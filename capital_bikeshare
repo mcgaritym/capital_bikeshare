@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jul  6 08:29:20 2020
+
+@author: mcgaritym
+"""
+
+import requests
+import io
+from io import BytesIO
+from bs4 import BeautifulSoup
+import urllib.request
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+import pandas as pd
+from datetime import date, datetime
+import re
+import time
+from urllib.request import urlopen
+import zipfile
+from zipfile import ZipFile
+import glob
+import os
+from urllib.request import urlopen, Request
+
+# set driver options and request options
+options = webdriver.ChromeOptions()
+options.add_argument('--ignore-certificate-errors')
+options.add_argument('--headless')
+options.add_argument('--incognito')
+driver = webdriver.Chrome(ChromeDriverManager().install())
+headers = {"User-Agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.39 Safari/537.36', 
+            "Accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'}
+
+url = 'https://s3.amazonaws.com/capitalbikeshare-data/index.html'
+driver.get(url)
+time.sleep(2)
+driver.execute_script("window.scrollTo(0, 500000)")
+time.sleep(2)
+page_source = driver.page_source
+soup = BeautifulSoup(page_source, "html.parser")
+links = []
+for link in soup.findAll('a'):
+    link_text = link.get('href')
+    str(link_text)
+    if ('2020' in link_text) or ('2019' in link_text) or ('2018' in link_text):
+        links.append(link_text)
+
+print(links)
+
+df = pd.DataFrame()
+
+for url in links:
+
+
+    # r = Request(url, headers = {'User-Agent': 'Mozilla/5.0'})
+    # b2 = [z for z in url.split('/') if '.zip' in z][0] #gets just the '.zip' part of the url
+    # print(b2)
+    # with open(b2, "wb") as target:
+    #     target.write(urlopen(r).read()) #saves to file to disk
+    # data = pd.read_csv(b2, compression='zip') #opens the saved zip file
+    # print(data)
+    # df = df.append(data)
+    # os.remove(b2) #removes the zip file
+    
+    remote_zip_file = urlopen(url)
+    zipinmemory = BytesIO(remote_zip_file.read())
+    zip_file = zipfile.ZipFile(zipinmemory)
+    
+    # the zipfile namelist can be filtered for smarter file loading
+    # In this case, only load the first file from the zip archive 
+    data = pd.read_csv(zip_file.open(zip_file.namelist()[0]))
+    df = pd.concat([df, data], axis=0, sort=False)
+    print(df.tail())
+    
+df.reindex()  
+
+df1 = df.iloc[:100000]  
+df2 = df.iloc[-100000:]  
+
+
+    #     csv_ = url.split('-data/')[-1].split('.zip')[0]
+#     csv_ = csv_ + str('.csv')
+#     z = urlopen(url)
+#     myzip = ZipFile(BytesIO(z.read())).extract(csv_)
+#     df = df.append(pd.read_csv(myzip))
