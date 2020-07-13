@@ -5,7 +5,9 @@ Created on Mon Jul  6 08:29:20 2020
 
 @author: mcgaritym
 """
-# STEP 1: load required libraries
+# PART 1: LOAD DATA
+
+#load required libraries
 import requests
 import io
 from io import BytesIO
@@ -32,7 +34,7 @@ from folium import plugins
 from folium.plugins import HeatMap
 import numpy as np
 
-# STEP 2: set driver options, request options, and url
+# set driver options, request options, and url
 # options = webdriver.ChromeOptions()
 # options.add_argument('--ignore-certificate-errors')
 # options.add_argument('--headless')
@@ -76,6 +78,8 @@ import numpy as np
 #     # print(df.tail())
 
 #----------------------------------------------------------------------------
+
+# PART 2: CLEAN AND PROCESS DATA
 
 files = glob.glob('20*')
 files.sort()
@@ -158,11 +162,11 @@ df2 = df.iloc[-1000:]
 
 
 # ## PLOT 3: Heatmap of Rides
-# df = df.dropna(subset=['start_lat', 'start_lng'])
-# #m = folium.Map([38.8977, -77.0365], zoom_start=14)
-# def generateBaseMap(default_location=[38.8977, -77.0365], default_zoom_start=13):
-#     base_map = folium.Map(location=default_location, control_scale=True, zoom_start=default_zoom_start)
-#     return base_map
-# base_map = generateBaseMap()
-# m = HeatMap(data=df[['start_lat', 'start_lng', 'number_rides']].groupby(['start_lat', 'start_lng']).sum().reset_index().values.tolist(), radius=8, max_zoom=13).add_to(base_map)
-# m.save('map2.html')
+#df = df.dropna(subset=['start_lat', 'start_lng'])
+#m = folium.Map([38.8977, -77.0365], zoom_start=14)
+def generateBaseMap(default_location=[38.8977, -77.0365], default_zoom_start=12):
+    base_map = folium.Map(location=default_location, control_scale=True, zoom_start=default_zoom_start)
+    return base_map
+base_map = generateBaseMap()
+m = HeatMap(data=df[['start_lat', 'start_lng', 'number_rides']].groupby(['start_lat', 'start_lng']).sum().reset_index().values.tolist(), radius=8, max_zoom=12).add_to(base_map)
+m.save('map2.html')
