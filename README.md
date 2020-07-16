@@ -1,4 +1,4 @@
-# Capital Bikeshare Before & After COVID-19
+# Capital Bikeshare Before & During COVID-19
 15 Jul 2020
 
 ## Description
