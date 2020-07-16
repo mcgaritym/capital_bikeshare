@@ -139,7 +139,7 @@ df2 = df.iloc[-1000:]
 
 
 #df.groupby('start_station_name')['number_rides'].count().nlargest(10)
-#df = df.set_index('started_at')
+
 
 ## PLOT 1: Barplot of Top 5 Stations
 # sns.set(style="darkgrid")
@@ -161,12 +161,93 @@ df2 = df.iloc[-1000:]
 # #plt.savefig('top5_ride_stations_.png', dpi=300, bbox_inches='tight')
 
 
-# ## PLOT 3: Heatmap of Rides
+## PLOT 3: Heatmap of Rides
 #df = df.dropna(subset=['start_lat', 'start_lng'])
 #m = folium.Map([38.8977, -77.0365], zoom_start=14)
-def generateBaseMap(default_location=[38.8977, -77.0365], default_zoom_start=12):
-    base_map = folium.Map(location=default_location, control_scale=True, zoom_start=default_zoom_start)
-    return base_map
-base_map = generateBaseMap()
-m = HeatMap(data=df[['start_lat', 'start_lng', 'number_rides']].groupby(['start_lat', 'start_lng']).sum().reset_index().values.tolist(), radius=8, max_zoom=12).add_to(base_map)
-m.save('map2.html')
+
+# def generateBaseMap(default_location=[38.8977, -77.0365], default_zoom_start=12):
+#     base_map = folium.Map(location=default_location, control_scale=True, zoom_start=default_zoom_start)
+#     return base_map
+# base_map = generateBaseMap()
+# m = HeatMap(data=df[['start_lat', 'start_lng', 'number_rides']].groupby(['start_lat', 'start_lng']).sum().reset_index().values.tolist(), radius=8, max_zoom=12).add_to(base_map)
+# m.save('map2.html')
+
+
+## PLOT 4: Time Based (Start Time) Heatmap of Rides
+
+# base_map = folium.Map(location=[38.8977, -77.0365], control_scale=True, zoom_start=12)
+
+# df['start_lat'] = df['start_lat'].astype(float)
+# df['start_lng'] = df['start_lng'].astype(float)
+
+# # filter for 2020 year only
+# heat_df = df[(df['started_at'] >= '2019-01-01') & (df['started_at'] <= '2020-01-01') ]
+
+# #create weight column using date
+# heat_df['started_at'] = heat_df['started_at'].astype(str)
+# heat_df['weight'] = heat_df['started_at'].apply(lambda x: x[5:7])
+# heat_df['weight'] = heat_df['weight'].astype(float)
+
+# # reduce dataframe to just lat, long
+# heat_df = heat_df[['start_lat', 'start_lng', 'weight']]
+# heat_df = heat_df.dropna(axis=0, subset=['start_lat', 'start_lng', 'weight'])
+
+# # list comprehension to make list of lists
+# heat_data = [[[row['start_lat'],row['start_lng']] for index, row in heat_df[heat_df['weight'] == i].iterrows()] for i in range(0,13)]
+
+# # plot map
+# hm = plugins.HeatMapWithTime(heat_data,auto_play=True,max_opacity=0.8)
+# hm.add_to(base_map)
+
+# # display and save map
+# base_map
+# base_map.save('map5.html')
+
+# Compare Mar 2020 - Jun 2020 compared to 2018 and 2020 rides
+df = df[(df['started_at'].dt.month >= 3) & (df['started_at'].dt.month <= 6)]
+df['year'] = df['started_at'].apply(lambda x: x.year)
+df['year'] = df['year'].astype('category')
+df['start_station_name'] = df['start_station_name'].astype('category')
+
+
+# print sample of columns
+df1 = df.iloc[:1000]
+df2 = df.iloc[-1000:]
+
+print(df.info())
+
+df_grouped = df.groupby(['start_station_name', 'year'])['number_rides'].count().unstack()
+df_grouped.columns = df_grouped.columns.tolist()
+
+
+
+print(df_grouped)
+
+print(df_grouped.info())
+
+print(df_grouped.columns)
+
+#df_table = pd.pivot_table(df, values='number_rides', index='start_station_name',columns='year', aggfunc=np.sum)
+
+# print(df_table.index)
+# print(df_table.info())
+# print(df_table.columns)
+
+# df_table.reset_index()
+
+# print(df_table.index)
+# print(df_table.info())
+# print(df_table.columns)
+
+# #df_table[['2018', '2019', '2020']] = df_table[['2018', '2019', '2020']].astype(int)
+#df_grouped['% Change 2019-2020'] = (df_grouped['2020'] - df_grouped['2019'])/df_grouped['2019'] * 100
+
+# #df_table['% Change 2019-2020'] = df[df['2019', '2020']].pct_change(axis='columns')
+# df_table['% Change 2019-2020'].sort_values(ascending=False)
+
+
+
+# print(df_table)
+# # print(df.groupby('start_station_name')['number_rides'].count().nlargest(10))
+
+
