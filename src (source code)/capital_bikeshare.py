@@ -34,7 +34,6 @@ from folium import plugins
 from folium.plugins import HeatMap
 import numpy as np
 
-
 files = glob.glob('20*')
 files.sort()
 #print(files)
